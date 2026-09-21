@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+@theme {
+  /* 奶油白 & 温暖底色 */
+  --color-cream-50: #FDFBF7;
+  --color-cream-100: #FAF6EF;
+  --color-cream-200: #F5EFE3;
+  --color-cream-300: #EDE5D4;
+
+  /* 鼠尾草绿 - 主要点缀色 */
+  --color-sage-50: #F1F5F0;
+  --color-sage-100: #E4EBE1;
+  --color-sage-200: #CBD8C6;
+  --color-sage-300: #A8BEA0;
+  --color-sage-400: #85A17B;
+  --color-sage-500: #6A855F;
+  --color-sage-600: #516849;
+
+  /* 陶土红 - 暖色调点缀 */
+  --color-terracotta-50: #FAF0EC;
+  --color-terracotta-100: #F4DED5;
+  --color-terracotta-200: #E8BBAE;
+  --color-terracotta-300: #D69586;
+  --color-terracotta-400: #C47260;
+  --color-terracotta-500: #A85748;
+  --color-terracotta-600: #864238;
+
+  /* 迷雾蓝 - 中性冷色调 */
+  --color-mist-50: #F1F4F6;
+  --color-mist-100: #E3E8EC;
+  --color-mist-200: #CAD4DA;
+  --color-mist-300: #A8B7C0;
+  --color-mist-400: #7E929E;
+  --color-mist-500: #5D7380;
+
+  /* 蜂蜜黄 - 暖黄点缀 */
+  --color-honey-50: #FDF6E5;
+  --color-honey-100: #FBEDC7;
+  --color-honey-200: #F6DA8C;
+  --color-honey-300: #EEC053;
+  --color-honey-400: #E3A832;
+  --color-honey-500: #C78C1D;
+
+  /* 薰衣草紫 - 柔紫色点缀 */
+  --color-lavender-50: #F5F1F8;
+  --color-lavender-100: #E8DFF0;
+  --color-lavender-200: #D0BFE0;
+  --color-lavender-300: #B299CA;
+  --color-lavender-400: #9575B4;
+  --color-lavender-500: #7A5A99;
+
+  /* 中性色 - 文字与边框 */
+  --color-ink-900: #2D2A26;
+  --color-ink-800: #3D3A35;
+  --color-ink-700: #56524C;
+  --color-ink-600: #716C64;
+  --color-ink-500: #8D8880;
+  --color-ink-400: #ABA59B;
+  --color-ink-300: #C9C4BA;
+  --color-ink-200: #E0DCD2;
+  --color-ink-100: #F0EDE5;
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
+
+  /* 阴影 - 柔和分层 */
+  --shadow-sm: 0 1px 2px rgba(45, 42, 38, 0.04), 0 1px 3px rgba(45, 42, 38, 0.06);
+  --shadow-md: 0 4px 8px rgba(45, 42, 38, 0.05), 0 2px 4px rgba(45, 42, 38, 0.06);
+  --shadow-lg: 0 10px 25px rgba(45, 42, 38, 0.06), 0 4px 10px rgba(45, 42, 38, 0.04);
+  --shadow-xl: 0 20px 40px rgba(45, 42, 38, 0.08), 0 8px 16px rgba(45, 42, 38, 0.05);
+
+  /* 圆角 */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --radius-2xl: 2.25rem;
+  --radius-full: 9999px;
+
+  /* 动画时长 */
+  --animate-duration-150: 150ms;
+  --animate-duration-200: 200ms;
+  --animate-duration-300: 300ms;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream-50);
+  color: var(--color-ink-800);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.01em;
+}
+
+/* 磨砂玻璃效果工具类 */
+.glass {
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-strong {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* 卡片悬浮微交互 */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 打卡成功的弹跳动画 */
+@keyframes checkPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-check-pop {
+  animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 淡入上滑 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 脉冲光晕（用于未完成任务） */
+@keyframes softPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 133, 95, 0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(168, 133, 95, 0); }
+}
+.animate-soft-pulse {
+  animation: softPulse 2.5s ease-in-out infinite;
+}
+
+/* 滚动条隐藏 */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
