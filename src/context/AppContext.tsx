@@ -17,33 +17,33 @@ interface AppState {
 }
 
 interface AppContextType extends AppState {
-  // 看板任务
+  // Tasks
   addTask: (task: Omit<Task, 'id' | 'column'> & { status?: Task['status']; priority?: Task['priority'] }) => Promise<void>;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id'>>) => Promise<void>;
   updateTaskStatus: (id: string, status: Task['status']) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
 
-  // 打卡习惯
+  // habites / chores
   toggleChore: (id: string, who: 'me' | 'partner') => Promise<void>;
   addChore: (chore: Omit<Chore, 'id' | 'myChecked' | 'partnerChecked'>) => Promise<void>;
   updateChore: (id: string, updates: Partial<Omit<Chore, 'id'>>) => Promise<void>;
   deleteChore: (id: string) => Promise<void>;
 
-  // 日历
+  // Calendar events
   addCalendarEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<void>;
   updateCalendarEvent: (id: string, updates: Partial<Omit<CalendarEvent, 'id'>>) => Promise<void>;
   deleteCalendarEvent: (id: string) => Promise<void>;
 
-  // 时间轴
+  // Timeline / Memories
   addMemory: (memory: Omit<MemoryItem, 'id'>) => Promise<void>;
   updateMemory: (id: string, updates: Partial<Omit<MemoryItem, 'id'>>) => Promise<void>;
   deleteMemory: (id: string) => Promise<void>;
 
-  // 主题色
+  // Theme Colours
   setMyColor: (color: UserColorKey) => void;
   setPartnerColor: (color: UserColorKey) => void;
 
-  // 刷新数据
+  // Updating all data at once.
   refreshAll: () => Promise<void>;
 }
 
@@ -61,7 +61,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [partnerColor, setPartnerColor] = useState<UserColorKey>('terracotta');
   const [loading, setLoading] = useState(true);
 
-  // --- 数据转换：Supabase 行 → 前端类型 ---
+  // --- Data Mapping ---
 
   const mapTask = (row: any): Task => ({
     id: row.id,
@@ -119,7 +119,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     cover_image_index: row.cover_image_index ?? 0,
   });
 
-  // --- 数据加载 ---
+  // --- Data Loading ---
 
   const fetchAll = useCallback(async (hid: string) => {
     setLoading(true);
@@ -142,14 +142,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // household 变化时重新加载数据
+  // Refresh data when householdId changes
   useEffect(() => {
     if (householdId) {
       fetchAll(householdId);
     }
   }, [householdId, fetchAll]);
 
-  // 从 profile 同步颜色主题
+  // --- Theme Color Management ---
   useEffect(() => {
     if (profile?.color_theme) {
       setMyColor(profile.color_theme as UserColorKey);
@@ -170,7 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [householdId, fetchAll]);
 
-  // --- 看板任务 ---
+  // --- Tasks ---
 
   const addTask = async (taskData: any) => {
     if (!householdId) return;
@@ -317,7 +317,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setChores((prev) => prev.filter((c) => c.id !== id));
   };
 
-  // --- 日历 ---
+  // --- Calendar ---
 
   const addCalendarEvent = async (eventData: any) => {
     if (!householdId) return;
@@ -380,13 +380,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCalendarEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
-  // 辅助：从 gradient 字符串提取主色名
+  // colour
   const extractColorFromGradient = (gradient: string): string => {
     const match = gradient.match(/from-(\w+)-/);
     return match ? match[1] : 'sage';
   };
 
-  // --- 时间轴 ---
+  // --- timeline ---
 
   const addMemory = async (memoryData: any) => {
     if (!householdId) {
@@ -460,7 +460,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMemories((prev) => prev.filter((m) => m.id !== id));
   };
 
-  // --- 主题色 ---
+  // --- Theme Colour ---
   const setMyColorState = (color: UserColorKey) => setMyColor(color);
   const setPartnerColorState = (color: UserColorKey) => setPartnerColor(color);
 

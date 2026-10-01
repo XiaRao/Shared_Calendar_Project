@@ -32,7 +32,7 @@ function MainApp() {
     }
   };
 
-  const householdName = household?.name || '我们的小窝';
+  const householdName = household?.name || 'Our Household';
 
   return (
     <div className="min-h-screen bg-cream-50">

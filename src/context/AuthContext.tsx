@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { supabase } from '../lib/supabase';
+//import Session type and User type from supabse-js
 import type { Session, User } from '@supabase/supabase-js';
 
 export interface Profile {
@@ -63,10 +64,11 @@ interface AuthContextType {
   refreshHousehold: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const text = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
+  // This is from Supabase's auth.user() which is the authenticated user object
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [household, setHousehold] = useState<Household | null>(null);
@@ -75,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [daysTogether, setDaysTogether] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
-  // 颜色主题映射（Tailwind 类名 + hex 值）
+  // Time theme
   const colorThemeMap: Record<string, {
     bg: string; text: string; border: string; lightBg: string;
     gradientFrom: string; gradientTo: string; shadowColor: string; ringColor: string;
@@ -128,8 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setProfile(data as Profile);
 
+    // If the user has a household_id, fetch the household and its members
     if (data.household_id) {
-      // 拉取 household 信息
+      // get household data
       const { data: householdData } = await supabase
         .from('households')
         .select('*')
@@ -137,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
       setHousehold(householdData as Household);
 
-      // 计算在一起的天数（优先用 anniversary，否则用 created_at）
+      // Calculate days together based on anniversary or created_at.
       const dateStr = householdData?.anniversary || householdData?.created_at;
       if (dateStr) {
         const start = new Date(dateStr);
@@ -150,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setDaysTogether(0);
       }
 
-      // 拉取同 household 下的所有成员
+      // Get all members of the household, excluding the current user, to identify the partner
       const { data: members } = await supabase
         .from('profiles')
         .select('*')
@@ -158,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: true });
       if (members && members.length > 0) {
         setHouseholdProfiles(members as Profile[]);
-        // 伴侣：排除当前用户的第一个成员
+        // Assuming the partner is the first member in the list who is not the current user
         const otherMembers = members.filter((m: any) => m.id !== userId);
         setPartner(otherMembers.length > 0 ? (otherMembers[0] as Profile) : null);
       } else {
@@ -178,8 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await fetchProfile(user.id);
   }, [user, fetchProfile]);
 
+  // On component mount, check if there's an existing session and set the user and session state accordingly
   useEffect(() => {
-    // 获取初始 session
+    // Gets client data from supabase auth session and sets the user and session state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -190,10 +194,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // 监听 auth 状态变化
+    // When authentication state changes, update the user and session state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      // This callback is triggered whenever the auth state changes (sign in, sign out, token refresh, etc.)
       async (_event, session) => {
         setSession(session);
+        // Update the user state based on the new session
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
@@ -209,6 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
+  // Authentication methods. Here we use email and password for simplicity.
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -217,6 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  // Sign up method. Here the user would need to confirm their email before they can sign in.
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -230,7 +238,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const createHousehold = async (name = '我们的小窝') => {
+  // Create a new household and associate the current user with it.
+  const createHousehold = async (name = 'Our Household') => {
     const { data, error } = await supabase
       .from('households')
       .insert({ name })
@@ -256,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const joinHousehold = async (inviteCode: string) => {
-    // inviteCode 就是 household_id 的完整 UUID
+    // Check if the invite code corresponds to a valid household
     const { data, error } = await supabase
       .from('households')
       .select('id')
@@ -264,7 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (error || !data) {
-      throw new Error('邀请码无效，请检查后重试');
+      throw new Error('The Invite code is invalid or the household does not exist.');
     }
 
     if (user) {
@@ -308,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await fetchProfile(user.id);
   };
 
-  // 一次性更新多个 profile 字段，减少多次请求
+  // Update the user's profile with the provided updates (display_name and/or theme_color)
   const updateProfile = async (updates: { display_name?: string; theme_color?: string }) => {
     if (!user) return;
     const { error } = await supabase
@@ -331,7 +340,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     if (data) {
       setHousehold(data as Household);
-      // 重新计算天数
+      // re-calculate daysTogether if anniversary or created_at is updated
       const dateStr = (data as Household).anniversary || (data as Household).created_at;
       if (dateStr) {
         const start = new Date(dateStr);

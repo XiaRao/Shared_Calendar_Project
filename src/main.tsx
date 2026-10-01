@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-console.log('[SyncLife] main.tsx 开始执行')
+console.log('[SyncLife] main.tsx starting...')
 
 const rootEl = document.getElementById('root')
-console.log('[SyncLife] root 元素:', rootEl)
+console.log('[SyncLife] root element:', rootEl)
 
 if (rootEl) {
   try {
@@ -15,11 +15,11 @@ if (rootEl) {
         <App />
       </StrictMode>,
     )
-    console.log('[SyncLife] React 渲染完成')
+    console.log('[SyncLife] React finished rendering App component')
   } catch (e) {
-    console.error('[SyncLife] React 渲染错误:', e)
-    rootEl.innerHTML = '<div style="padding:20px;color:red;">渲染错误: ' + String(e) + '</div>'
+    console.error('[SyncLife] React error with rendering:', e)
+    rootEl.innerHTML = '<div style="padding:20px;color:red;">error with rendering: ' + String(e) + '</div>'
   }
 } else {
-  console.error('[SyncLife] 找不到 #root 元素')
+  console.error('[SyncLife] cannot find root element to render React app. Please check your index.html file.')
 }
